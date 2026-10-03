@@ -1,10 +1,19 @@
-# v3.2-M3SR-MambaIRv2
+# v3.2-M3SR-MambaIRv2-E0
 
 UDR-MambaSR：RGB routing ambiguity 与 Depth reliability 双条件控制的单次 late residual correction，用于 RGB + Depth → RGB ×4 超分辨率。Depth 不修改 RGB routing、sorting、Delta、A/B/C 或 selective scan。
 
+- [E0 机制审计与运行命令](docs/E0_GUIDE.md)
 - [完整实现说明、训练/续训/测试命令](docs/UDR_MambaSR_GUIDE.md)
 - [用户提供的完整方案](docs/UDR_MambaSR_SPEC.md)
 - [本地验证记录与未验证项](docs/UDR_VERIFICATION.md)
+
+当前 E0 不训练模型。服务器在已有 UDR Phase B 权重上运行：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/udr/e0_mechanism_audit.py --udr-checkpoint /home/BRAIN/xukai/code/v3.2-M3SR-MambaIRv2/experiments/v3.2_UDR_MambaSR_x4_phaseB/models/net_g_100000.pth --seeds 10 11 12 --visualize-count 20 --output results/E0_udr_mechanism_audit
+```
+
+以下为原 v3.2 模型的历史训练说明：
 
 训练从已确认的 RGB baseline `net_g_490000.pth` 开始：Phase A 冻结 RGB，训练 UDR 100k；Phase B 联合微调 100k，Depth LR=1e-4、RGB LR=1e-5，均恒定，仅用 L1。全部原有数据集路径保留。正式性能需训练后通过三次匹配种子推理评估。
 

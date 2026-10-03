@@ -1,7 +1,7 @@
 # UDR-MambaSR v3.2：实现与完整运行命令
 
 本地源码工作空间：`D:\Code\Python\M3SR-MambaIRv2`。
-保存仓库：<https://github.com/KaiXu-HIT/v3.2-M3SR-MambaIRv2>，分支 `main`。
+保存仓库：<https://github.com/KaiXu-HIT/v3.2-M3SR-MambaIRv2-E0>，分支 `main`。
 方案原文：[UDR_MambaSR_SPEC.md](UDR_MambaSR_SPEC.md)。
 
 ## 已确认的实验配置
@@ -53,7 +53,7 @@
 首次拉取：
 
 ```bash
-git clone --branch main https://github.com/KaiXu-HIT/v3.2-M3SR-MambaIRv2.git /home/BRAIN/xukai/code/v3.2-M3SR-MambaIRv2
+git clone --branch main https://github.com/KaiXu-HIT/v3.2-M3SR-MambaIRv2-E0.git /home/BRAIN/xukai/code/v3.2-M3SR-MambaIRv2
 cd /home/BRAIN/xukai/code/v3.2-M3SR-MambaIRv2
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 ```
