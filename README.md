@@ -1,13 +1,20 @@
-# v3.2-M3SR-MambaIRv2-E0
+# v3.2-M3SR-MambaIRv2v3.2-E1
 
 UDR-MambaSR：RGB routing ambiguity 与 Depth reliability 双条件控制的单次 late residual correction，用于 RGB + Depth → RGB ×4 超分辨率。Depth 不修改 RGB routing、sorting、Delta、A/B/C 或 selective scan。
 
+- [E1 Manga109/Urban100 逐图诊断与完整命令](docs/E1_GUIDE.md)
 - [E0 机制审计与运行命令](docs/E0_GUIDE.md)
 - [完整实现说明、训练/续训/测试命令](docs/UDR_MambaSR_GUIDE.md)
 - [用户提供的完整方案](docs/UDR_MambaSR_SPEC.md)
 - [本地验证记录与未验证项](docs/UDR_VERIFICATION.md)
 
-当前 E0 不训练模型。服务器在已有 UDR Phase B 权重上运行：
+当前 E1 不训练模型。服务器使用 E0 已训练权重在 Manga109 和 Urban100 上运行逐图诊断：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/udr/e1_dataset_diagnosis.py --rgb-checkpoint /home/BRAIN/xukai/code/v1.0-M3SR-MambaIRv2/experiments/v1.0_RGB_MambaIRv2_x4/models/net_g_490000.pth --udr-checkpoint /home/BRAIN/xukai/code/v3.2-M3SR-MambaIRv2/experiments/v3.2_UDR_MambaSR_x4_phaseB/models/net_g_100000.pth --seeds 10 11 12 --output results/E1_dataset_diagnosis
+```
+
+以下为 E0 的历史机制审计命令：
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python scripts/udr/e0_mechanism_audit.py --udr-checkpoint /home/BRAIN/xukai/code/v3.2-M3SR-MambaIRv2/experiments/v3.2_UDR_MambaSR_x4_phaseB/models/net_g_100000.pth --seeds 10 11 12 --visualize-count 20 --output results/E0_udr_mechanism_audit
