@@ -1,7 +1,8 @@
-# v3.2-M3SR-MambaIRv2-E2
+# v3.2-M3SR-MambaIRv2-E3
 
 UDR-MambaSR：RGB routing ambiguity 与 Depth reliability 双条件控制的单次 late residual correction，用于 RGB + Depth → RGB ×4 超分辨率。Depth 不修改 RGB routing、sorting、Delta、A/B/C 或 selective scan。
 
+- [E3 局部 alpha 实验、四档正则、训练与测试命令](docs/E3_GUIDE.md)
 - [E2 U1/U2/U3 uncertainty 实验、训练与测试命令](docs/E2_GUIDE.md)
 - [E1 Manga109/Urban100 逐图诊断与完整命令](docs/E1_GUIDE.md)
 - [E0 机制审计与运行命令](docs/E0_GUIDE.md)
@@ -9,7 +10,9 @@ UDR-MambaSR：RGB routing ambiguity 与 Depth reliability 双条件控制的单�
 - [用户提供的完整方案](docs/UDR_MambaSR_SPEC.md)
 - [本地验证记录与未验证项](docs/UDR_VERIFICATION.md)
 
-当前 E2 只更换 RGB uncertainty。U1 为路由集中度，U2 为局部 RGB 特征方差，U3 为固定 RGB-only 重建误差监督的轻量 head；U3 先单独训练 head 30k，再联合训练 100k。完整命令见 [E2 指南](docs/E2_GUIDE.md)。
+当前 E3 只把 E0 的全局 alpha 替换为单通道空间自适应局部 alpha，不叠加 E2 uncertainty。四档 `lambda_A` 分别进行 30k Phase A 与 100k Phase B 训练。完整命令见 [E3 指南](docs/E3_GUIDE.md)。
+
+以下为 E2 的历史实验说明：U1 为路由集中度，U2 为局部 RGB 特征方差，U3 为固定 RGB-only 重建误差监督的轻量 head；详见 [E2 指南](docs/E2_GUIDE.md)。
 
 以下为 E1 的历史逐图诊断命令：
 

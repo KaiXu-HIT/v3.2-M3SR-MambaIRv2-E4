@@ -111,7 +111,11 @@ class AuditHooks:
         residual = self.parts['residual']
         gate = ambiguity * confidence
         correction = output[0] - feature
-        expected = module.alpha * gate * residual
+        # E3 replaces only scalar alpha with a spatial map. Read the actual
+        # forward value so the diagnostic assertion covers both E0 and E3.
+        strength = (module.local_alpha_map if hasattr(module, 'local_alpha_map')
+                    else module.alpha)
+        expected = strength * gate * residual
         torch.testing.assert_close(correction, expected, rtol=2e-3, atol=1e-6)
         h, w = ambiguity.shape[-2:]
         if len(self.routes) != sum(len(stage.residual_group.layers)
@@ -135,6 +139,9 @@ class AuditHooks:
             correction.square().mean(1, keepdim=True),
             correction.abs().amax(1, keepdim=True),
             feature.abs().mean(1, keepdim=True))))
+        if hasattr(module, 'local_alpha_map'):
+            self.maps['local_alpha'] = module.local_alpha_map
+            self.shapes['local_alpha'] = list(module.local_alpha_map.shape)
         self.parts['correction'] = correction
         self.shapes['gate'] = list(gate.shape)
         self.shapes['correction'] = list(correction.shape)
