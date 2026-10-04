@@ -122,9 +122,11 @@ class AuditHooks:
             channels = torch.stack([entry[index].reshape(ambiguity.shape[0], 1, h, w)
                                     for entry in self.routes]).mean(0)
             route_maps.append(channels)
-        # The hook must recover exactly the ambiguity used by the real UDR forward.
-        torch.testing.assert_close(route_maps[0].clamp(0, 1), ambiguity.float(),
-                                   rtol=1e-5, atol=1e-6)
+        # E0 consumes entropy exactly; E2 deliberately supplies a different
+        # uncertainty map to the same late UDR expert. Keep both observable.
+        if not hasattr(self.model, 'uncertainty_mode'):
+            torch.testing.assert_close(route_maps[0].clamp(0, 1), ambiguity.float(),
+                                       rtol=1e-5, atol=1e-6)
         self.maps = dict(zip(MAP_KEYS, (
             route_maps[0], route_maps[1], route_maps[2], ambiguity,
             confidence, gate, module.gradient(self.parts['depth']),

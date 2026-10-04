@@ -68,6 +68,8 @@ class DepthResidualExpert(nn.Module):
         # Diagnostics retain scalars only; never store tensors with an autograd graph.
         stats = dict(ambiguity_mean=ambiguity.detach().mean(),
                      confidence_mean=confidence.detach().mean(), gate_mean=gate.detach().mean(),
+                     # E2 mechanism log only; the gate calculation is unchanged.
+                     gate_std=gate.detach().float().std(unbiased=False),
                      alpha=self.alpha.detach(), correction_rms=correction.detach().square().mean().sqrt())
         return feature + correction, stats
 

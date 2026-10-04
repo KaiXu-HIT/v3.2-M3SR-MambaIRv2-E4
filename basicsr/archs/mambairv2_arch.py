@@ -242,21 +242,25 @@ class ASSM(nn.Module):
         )
 
     def forward(self, x, x_size, token, depth=None, confidence=None, enable_gtss=False,
-                ambiguity_collector=None):
+                ambiguity_collector=None, routing_uncertainty_mode='entropy'):
         B, n, C = x.shape
         H, W = x_size
 
         full_embedding = self.embeddingB.weight @ token.weight  # [128, C]
 
         pred_route = self.route(x)  # [B, HW, num_token]
-        # UDR v3.2: read-only entropy in ORIGINAL spatial order, before Gumbel/sort.
-        # LogSoftmax is already in route; softmax(log p) recovers the same p.
-        # A local collector avoids persistent autograd graphs and consumes no RNG.
+        # E2-U1 reads the same pre-Gumbel route probabilities as E0, without
+        # altering routing, sorting or the selective scan. E0 keeps entropy.
         if ambiguity_collector is not None:
             probability = pred_route.float().softmax(dim=-1)
-            entropy = -(probability * probability.clamp_min(1e-12).log()).sum(-1)
-            entropy = entropy / math.log(self.num_tokens)
-            ambiguity_collector.append(entropy.clamp(0, 1).reshape(B, 1, H, W))
+            if routing_uncertainty_mode == 'concentration':
+                uncertainty = 1.0 - probability.amax(dim=-1)
+            elif routing_uncertainty_mode == 'entropy':
+                uncertainty = -(probability * probability.clamp_min(1e-12).log()).sum(-1)
+                uncertainty = uncertainty / math.log(self.num_tokens)
+            else:
+                raise ValueError('Unsupported routing uncertainty mode.')
+            ambiguity_collector.append(uncertainty.clamp(0, 1).reshape(B, 1, H, W))
         cls_policy = F.gumbel_softmax(pred_route, hard=True, dim=-1)  # [B, HW, num_token]
 
         prompt = torch.matmul(cls_policy, full_embedding).view(B, n, self.d_state)
@@ -529,7 +533,8 @@ class AttentiveLayer(nn.Module):
         x_aca = self.assm(self.norm3(x), x_size, self.embeddingA,
                           depth=params.get('depth'), confidence=params.get('confidence'),
                           enable_gtss=params.get('enable_gtss', False),
-                          ambiguity_collector=params.get('ambiguity_collector')) + x
+                          ambiguity_collector=params.get('ambiguity_collector'),
+                          routing_uncertainty_mode=params.get('routing_uncertainty_mode', 'entropy')) + x
         x = x_aca + self.convffn2(self.norm4(x_aca), x_size)
         x = shortcut * self.scale2 + x
 
